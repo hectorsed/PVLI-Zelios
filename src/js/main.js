@@ -438,6 +438,10 @@ var SpaceAccountants = function () {
     this.cursors = null;
     this.speed = 300;
 
+    this.enemy1 = null;
+    this.enemyWeapon = null;
+    this.enemySpeed = 200;
+
     this.weapons = [];
     this.currentWeapon = 0;
     this.weaponName = null;
@@ -463,6 +467,7 @@ SpaceAccountants.prototype = {
         //this.load.image('background', 'assets/backgroud.png');
         this.load.image('foreground', 'assets/fore.png');
         this.load.image('player', 'assets/ship.png');
+        this.load.image('enemy1', './images/enemy1.png');
         this.load.bitmapFont('shmupfont', 'assets/shmupfont.png', 'assets/shmupfont.xml');
 
         
@@ -501,6 +506,13 @@ SpaceAccountants.prototype = {
         this.player = this.add.sprite(64, 200, 'player');
         this.physics.arcade.enable(this.player);
         this.player.body.collideWorldBounds = true;
+
+        //Crea sprite enemigo, activa sus físicas y la colision con el mundo
+        this.enemy1 = this.add.sprite(1000, 200, 'enemy1');
+        this.physics.arcade.enable(this.enemy1);
+        this.enemy1.body.collideWorldBounds = true;
+
+        this.enemyWeapon = new Weapon.Misil(this.game);
 
         this.foreground = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'foreground');
         this.foreground.autoScroll(-60, 0);
@@ -569,6 +581,9 @@ SpaceAccountants.prototype = {
         if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
             this.weapons[this.currentWeapon].fire(this.player);
         }
+
+        this.enemy1.body.velocity.x = -this.enemySpeed;
+        this.enemyWeapon.fire(this.enemy1, -1);
 
     }
 

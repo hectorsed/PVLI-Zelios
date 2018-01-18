@@ -10,12 +10,12 @@ var Bullet = function (game, key) {
 
     this.anchor.set(0.5);
 
-    //Activa la destruccion al salir del mapa, inicializa a inexistente y con velocidad 0
+    //Activa la destruccion al salir del mapa, inicializa a inexistente
     this.checkWorldBounds = true;
     this.outOfBoundsKill = true;
     this.exists = false;
     this.tracking = false;
-    this.scaleSpeed = 0;
+    this.scaleSpeed = 0;    //Velocidad de redimensionamiento
 
 };
 
@@ -185,14 +185,10 @@ Weapon.EightWay.prototype.fire = function (source) {
     var x = source.x + 16;
     var y = source.y + 10;
 
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 45, this.bulletSpeed, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 90, this.bulletSpeed, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 135, this.bulletSpeed, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 180, this.bulletSpeed, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 225, this.bulletSpeed, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 270, this.bulletSpeed, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 315, this.bulletSpeed, 1000, 0);
+    for (var i = =; i > 8; i++) {
+        this.getFirstExists(false).fire(x, y, 45 * i, this.bulletSpeed, 1000, 0);
+        
+    };
 
     this.nextFire = this.game.time.time + this.fireRate;
 
@@ -231,9 +227,7 @@ Weapon.ScatterShot.prototype.fire = function (source) {
 
 };
 
-//////////////////////////////////////////////////////////////////////////
-//  Fires a streaming beam of lazers, very fast, in front of the player //
-//////////////////////////////////////////////////////////////////////////
+//Rayo laser
 
 Weapon.Beam = function (game) {
 
@@ -267,9 +261,7 @@ Weapon.Beam.prototype.fire = function (source) {
 
 };
 
-///////////////////////////////////////////////////////////////////////
-//  A three-way fire where the top and bottom bullets bend on a path //
-///////////////////////////////////////////////////////////////////////
+//Disparo tripe con los extremos curvandose
 
 Weapon.SplitShot = function (game) {
 
@@ -305,9 +297,7 @@ Weapon.SplitShot.prototype.fire = function (source) {
 
 };
 
-///////////////////////////////////////////////////////////////////////
-//  Bullets have Gravity.y set on a repeating pre-calculated pattern //
-///////////////////////////////////////////////////////////////////////
+//Balas que siguen un array de gravedades emitiendo un patron
 
 Weapon.Pattern = function (game) {
 
@@ -352,9 +342,7 @@ Weapon.Pattern.prototype.fire = function (source) {
 
 };
 
-///////////////////////////////////////////////////////////////////
-//  Rockets that visually track the direction they're heading in //
-///////////////////////////////////////////////////////////////////
+//Cohetes que visualmente persiguen al enemigo
 
 Weapon.Rockets = function (game) {
 
@@ -426,6 +414,4 @@ Weapon.ScaleBullet.prototype.fire = function (source) {
 
 };
 
-module.exports = {
-    Bullet, Weapon,
-};
+module.exports = { Bullet, Weapon };

@@ -1,6 +1,6 @@
 'use strict'
 
-var weapons = require('./armas.js');
+var weapon = require('./armas.js');
 
 var juego = {
 
@@ -32,7 +32,7 @@ var juego = {
     //this.background = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
     //this.background.autoScroll(-40, 0);
 
-    weapons.push(new Weapon.BalaSimple(this.game));
+    this.weapons.push(new weapon.Weapon.BalaSimple(this.game));
     weapons.push(new Weapon.Misil(this.game));
     weapons.push(new Weapon.Triple(this.game));
     weapons.push(new Weapon.EightWay(this.game));

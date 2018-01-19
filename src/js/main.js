@@ -1,7 +1,7 @@
 'use strict'
 var varmenu = require ('./menu.js')
 var varjuego = require ('./juego.js')
-var varcontroles = require ('./controles.js')
+var controles = require ('./controles.js')
 
 var BootScene = {
 
@@ -36,5 +36,7 @@ window.onload = function () {
   game.state.add('boot', BootScene);            //Metodo en este js
   game.state.add('menu', varmenu);          //Metodo menu de menu.js
   game.state.add('juego', varjuego);        //Metodo juego de juego.js
+  game.state.add('controles', controles);
+
   game.state.start('boot');
 };

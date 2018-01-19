@@ -92,14 +92,18 @@ Weapon.BalaSimple = function (game) {
 Weapon.BalaSimple.prototype = Object.create(Phaser.Group.prototype);
 Weapon.BalaSimple.prototype.constructor = Weapon.BalaSimple;
 
-//Creadora de la Bala Simple
+// Disparo de una bala simple
 Weapon.BalaSimple.prototype.fire = function (source, dir) {
+    // Comprobamos si se puede disparar
     if (this.nextFire > this.game.time.now) { return };
 
+    // Comprobamos si hay balas disponibles
     if (this.bullets.countDead() == 0) { return };
 
+    // Añadimos el tiempo de disparo entre disparo
     this.nextFire = this.game.time.now + this.fireRate;
 
+    // Hacemos el disparo: 1. Cogemos una bala 2. La ponemos en las coordenadas del "disparador" 3. Le damos velocidad
     var bullet = this.bullets.getFirstExists(false);
     bullet.reset(source.x, source.y);
     bullet.body.velocity.x = this.bulletSpeed * dir;
@@ -653,12 +657,21 @@ SpaceAccountants.prototype = {
 
     },
 
+    // Al detectar la colisión jugador con enemigo (más adelante servirá para jugador, bala enemigo), se lla a este método
     playerHit: function (player, enemy) {
         enemy.kill();
         this.puntuacion -= 50;
         if (this.puntuacion < 1000)
             console.log(this.puntuacion);
     }, 
+
+    // Al detectar la colisión bala con enemigo, se llama a este método
+    enemyHit: function(bullet, enemy) {
+        console.log('colision');
+        bullet.kill();
+        enemy.kill();
+        this.puntuacion += 100;
+    },
 
     update: function () {
 
@@ -668,9 +681,11 @@ SpaceAccountants.prototype = {
         this.nextEnemy();
         //this.enemyFire();
 
+        // Sistema de colisiones :: Para que sea más "bonito" podemos hacer otro método en la clase que recoja todas las llamadas y en el main solo llamar a ese método
         this.physics.arcade.overlap(this.player, this.enemies, this.playerHit, null, this);
-        this.physics.arcade.overlap(this.weapons[1].bullets, this.enemies, this.weapons[1].hit, null, this);
+        this.physics.arcade.overlap(this.weapons[this.currentWeapon].bullets, this.enemies, this.enemyHit, null, this);
 
+        // Detección de input :: Al implementar la clase de jugador aquí solo sería hacer llamada a this.playe.input(cursors, fireButton);
         if (this.cursors.left.isDown) {
             this.player.body.velocity.x = -this.speed;
             console.log('Pulsado');

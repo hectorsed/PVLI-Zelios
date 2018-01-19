@@ -1,56 +1,5 @@
 'use strict';
-
-//Sprite con propiedades, todas las armas lo usan
-var Bullet = function (game, key) {
-
-
-    Phaser.Sprite.call(this, game, 0, 0, key);
-
-    this.texture.baseTexture.scaleMode = PIXI.scaleModes.NEAREST;
-
-    this.anchor.set(0.5);
-
-    //Activa la destruccion al salir del mapa, inicializa a inexistente
-    this.checkWorldBounds = true;
-    this.outOfBoundsKill = true;
-    this.exists = false;
-    this.tracking = false;
-    this.scaleSpeed = 0;    //Velocidad de redimensionamiento
-
-};
-
-//Prototypes para las balas, creamos el sprite y llamamos a la constructora
-Bullet.prototype = Object.create(Phaser.Sprite.prototype);
-Bullet.prototype.constructor = Bullet;
-
-//Prototype funcion creadora
-Bullet.prototype.fire = function (x, y, angle, speed, gx, gy) {
-
-    this.reset(x, y);
-    //Inicializa bala con los valores generados por cada metodo arma
-    this.scale.set(1);
-    this.angle = angle;
-    this.body.gravity.set(gx, gy);
-
-    //Metodo que permite corregir la velocidad en funcion del angulo
-    this.game.physics.arcade.velocityFromAngle(angle, speed, this.body.velocity);
-
-
-};
-
-//Prototype del update que mueve la bala
-Bullet.prototype.update = function () {
-
-    if (this.tracking) {
-        this.rotation = Math.atan2(this.body.velocity.y, this.body.velocity.x);
-    }
-
-    if (this.scaleSpeed > 0) {
-        this.scale.x += this.scaleSpeed;
-        this.scale.y += this.scaleSpeed;
-    }
-
-};
+var bala = require ('./bala.js')
 
 //Clase arma que se compone de los diferentes tipos de disparo y las diferentes maneras de llamarlos
 var Weapon = {};
@@ -60,12 +9,13 @@ Weapon.BalaSimple = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Bala Simple', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 600;
     this.fireRate = 100;
 
     for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet1'), true);
+        this.add(new bala(game, 'bullet1'), true);
     }
 
     return this;
@@ -95,12 +45,13 @@ Weapon.Misil = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Misil', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 20;
     this.fireRate = 1000;
 
     for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet5'), true);
+        this.add(new bala(game, 'bullet5'), true);
     }
 
     return this;
@@ -128,13 +79,14 @@ Weapon.Triple = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Triple', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 400;
     this.fireRate = 400;
 
 
     for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, 'bullet7'), true);
+        this.add(new bala(game, 'bullet7'), true);
     }
     return this;
 
@@ -162,13 +114,14 @@ Weapon.Triple.prototype.fire = function (source) {
 Weapon.EightWay = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Eight Way', false, true, Phaser.Physics.ARCADE);
-
+    
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 200;
     this.fireRate = 100;
 
     for (var i = 0; i < 96; i++) {
-        this.add(new Bullet(game, 'bullet5'), true);
+        this.add(new bala(game, 'bullet5'), true);
     }
 
     return this;
@@ -185,7 +138,7 @@ Weapon.EightWay.prototype.fire = function (source) {
     var x = source.x + 16;
     var y = source.y + 10;
 
-    for (var i = =; i > 8; i++) {
+    for (var i = 0; i > 8; i++) {
         this.getFirstExists(false).fire(x, y, 45 * i, this.bulletSpeed, 1000, 0);
         
     };
@@ -199,12 +152,13 @@ Weapon.ScatterShot = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Scatter Shot', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 600;
     this.fireRate = 40;
 
     for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, 'bullet5'), true);
+        this.add(new bala(game, 'bullet5'), true);
     }
 
     return this;
@@ -233,12 +187,13 @@ Weapon.Beam = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Beam', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 1000;
     this.fireRate = 4;
 
     for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet6'), true);
+        this.add(new bala(game, 'bullet6'), true);
     }
 
     return this;
@@ -267,12 +222,13 @@ Weapon.SplitShot = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Split Shot', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 700;
     this.fireRate = 40;
 
     for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet8'), true);
+        this.add(new bala(game, 'bullet8'), true);
     }
 
     return this;
@@ -303,6 +259,7 @@ Weapon.Pattern = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Pattern', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 600;
     this.fireRate = 40;
@@ -313,7 +270,7 @@ Weapon.Pattern = function (game) {
     this.patternIndex = 0;
 
     for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet4'), true);
+        this.add(new bala(game, 'bullet4'), true);
     }
 
     return this;
@@ -348,12 +305,13 @@ Weapon.Rockets = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Rockets', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 400;
     this.fireRate = 250;
 
     for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, 'bullet5'), true);
+        this.add(new bala(game, 'bullet5'), true);
     }
 
     this.setAll('tracking', true);
@@ -380,16 +338,17 @@ Weapon.Rockets.prototype.fire = function (source) {
 };
 
 //Bala que aumenta de tamaño conforme avanza
-Weapon.ScaleBullet = function (game) {
+Weapon.balaEscalada = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Scale Bullet', false, true, Phaser.Physics.ARCADE);
+    Phaser.Group.call(this, game, game.world, 'Bala Escalada', false, true, Phaser.Physics.ARCADE);
 
+    //Latencia entre disparo, velocidad del proyectir y cadencia
     this.nextFire = 0;
     this.bulletSpeed = 800;
     this.fireRate = 500;
 
     for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, 'bullet9'), true);
+        this.add(new bala(game, 'bullet9'), true);
     }
 
     this.setAll('scaleSpeed', 0.10);
@@ -398,10 +357,10 @@ Weapon.ScaleBullet = function (game) {
 
 };
 
-Weapon.ScaleBullet.prototype = Object.create(Phaser.Group.prototype);
-Weapon.ScaleBullet.prototype.constructor = Weapon.ScaleBullet;
+Weapon.balaEscalada.prototype = Object.create(Phaser.Group.prototype);
+Weapon.balaEscalada.prototype.constructor = Weapon.balaEscalada;
 
-Weapon.ScaleBullet.prototype.fire = function (source) {
+Weapon.balaEscalada.prototype.fire = function (source) {
 
     if (this.game.time.time < this.nextFire) { return; }
 
@@ -414,4 +373,6 @@ Weapon.ScaleBullet.prototype.fire = function (source) {
 
 };
 
-module.exports = { Bullet, Weapon };
+
+
+module.exports = Weapon;

@@ -1,6 +1,5 @@
 'use strict'
 var varmenu = require ('./menu.js')
-var varjuego = require ('./juego.js')
 var varcontroles = require ('./controles.js')
 
 var BootScene = {
@@ -9,7 +8,7 @@ var BootScene = {
     // load here assets required for the loading screen
   },
       create: function () {
-      this.game.state.start('preloader');   //Llama al metodo preloaderscene
+      this.state.start('preloader');   //Llama al metodo preloaderscene
     }
   };
 
@@ -35,6 +34,8 @@ window.onload = function () {
   game.state.add('preloader', PreloaderScene);  //Metodo en este js
   game.state.add('boot', BootScene);            //Metodo en este js
   game.state.add('menu', varmenu);          //Metodo menu de menu.js
-  game.state.add('juego', varjuego);        //Metodo juego de juego.js
+  game.state.add('juego', juego);
+  game.state.add('controles', controles);
+  game.state.add('creditos', creditos);
   game.state.start('boot');
 };

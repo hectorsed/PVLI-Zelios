@@ -68,15 +68,22 @@ var Weapon = {};
 //Bala simple que avanza
 Weapon.BalaSimple = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Bala Simple', false, true, Phaser.Physics.ARCADE);
-
+    this.bullets = game.add.group();
+    this.bullets.enableBody = true;
+    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.bullets.createMultiple(64, 'bullet1');
+    this.bullets.setAll('anchor.x', 0,5);
+    this.bullets.setAll('anchor.y', 0.5);
+    this.bullets.setAll('checkWorldBounds', true);
+    this.bullets.setAll('outOfBoundsKill', true);
+    this.game = game;
     this.nextFire = 0;
     this.bulletSpeed = 600;
     this.fireRate = 100;
 
-    for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet1'), true);
-    }
+    /*for (var i = 0; i < 64; i++) {
+        this.bullets.add(new Bullet(game, 'bullet1'), true);
+    }*/
 
     return this;
 };
@@ -87,8 +94,16 @@ Weapon.BalaSimple.prototype.constructor = Weapon.BalaSimple;
 
 //Creadora de la Bala Simple
 Weapon.BalaSimple.prototype.fire = function (source, dir) {
+    if (this.nextFire > this.game.time.now) { return };
 
-    if (this.game.time.time < this.nextFire) { return; }
+    if (this.bullets.countDead() == 0) { return };
+
+    this.nextFire = this.game.time.now + this.fireRate;
+
+    var bullet = this.bullets.getFirstExists(false);
+    bullet.reset(source.x, source.y);
+    bullet.body.velocity.x = this.bulletSpeed * dir;
+    /*if (this.game.time.time < this.nextFire) { return; }
 
     var x = source.x + 10;
     var y = source.y + 10;
@@ -96,7 +111,15 @@ Weapon.BalaSimple.prototype.fire = function (source, dir) {
     // getFirstExists(false): Busca en el grupo bala el primer objeto no existente para crearlo
     this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 0);
 
-    this.nextFire = this.game.time.time + this.fireRate;
+    this.nextFire = this.game.time.time + this.fireRate;*/
+
+
+};
+
+Weapon.BalaSimple.prototype.hit = function (obj1, obj2) {
+    console.log('colision');
+    obj2.kill();
+    obj1.kill();
 
 };
 
@@ -556,7 +579,7 @@ SpaceAccountants.prototype = {
         this.physics.arcade.enable(this.player);
         this.player.body.collideWorldBounds = true;
 
-        //Crea sprite enemigo, activa sus físicas y la colision con el mundo
+        // Crea un grupo de enemigos, activa sus físicas y la colision con el mundo
         this.enemies = game.add.group();
         this.enemies.enableBody = true;
         this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
@@ -597,7 +620,7 @@ SpaceAccountants.prototype = {
     },
 
     enemyFire: function(){
-        this.enemies.forEachAlive(function(enemy) { this.weapons[2].fire(enemy, -1); }, this);
+        this.enemies.forEachAlive(function(enemy) { this.weapons[0].fire(enemy, -1) }, this);
         /*if (this.enemies.countDead() > 0) {
             var enemy = this.enemies.getFirstExists(false);
             
@@ -643,9 +666,10 @@ SpaceAccountants.prototype = {
         console.log('puntuacion');
 
         this.nextEnemy();
-        this.enemyFire();
+        //this.enemyFire();
 
         this.physics.arcade.overlap(this.player, this.enemies, this.playerHit, null, this);
+        this.physics.arcade.overlap(this.weapons[1].bullets, this.enemies, this.weapons[1].hit, null, this);
 
         if (this.cursors.left.isDown) {
             this.player.body.velocity.x = -this.speed;

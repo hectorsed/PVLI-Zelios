@@ -68,6 +68,7 @@ var Weapon = {};
 //Bala simple que avanza
 Weapon.BalaSimple = function (game) {
 
+    // Balas del jugador
     this.bullets = game.add.group();
     this.bullets.enableBody = true;
     this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -76,8 +77,20 @@ Weapon.BalaSimple = function (game) {
     this.bullets.setAll('anchor.y', 0.5);
     this.bullets.setAll('checkWorldBounds', true);
     this.bullets.setAll('outOfBoundsKill', true);
+
+    // Balas del enemigo
+    this.enemyBullets = game.add.group();
+    this.enemyBullets.enableBody = true;
+    this.enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.enemyBullets.createMultiple(64, 'bullet1');
+    this.enemyBullets.setAll('anchor.x', 0,5);
+    this.enemyBullets.setAll('anchor.y', 0.5);
+    this.enemyBullets.setAll('checkWorldBounds', true);
+    this.enemyBullets.setAll('outOfBoundsKill', true);
+
     this.game = game;
     this.nextFire = 0;
+    this.nextEnemyFire = 0;
     this.bulletSpeed = 600;
     this.fireRate = 100;
 
@@ -102,11 +115,18 @@ Weapon.BalaSimple.prototype.fire = function (source, dir) {
 
     // Añadimos el tiempo de disparo entre disparo
     this.nextFire = this.game.time.now + this.fireRate;
+    this.nextEnemyFire = this.game.time.now + this.fireRate;
 
     // Hacemos el disparo: 1. Cogemos una bala 2. La ponemos en las coordenadas del "disparador" 3. Le damos velocidad
     var bullet = this.bullets.getFirstExists(false);
     bullet.reset(source.x, source.y);
     bullet.body.velocity.x = this.bulletSpeed * dir;
+     /*else {
+        var enemyBullet = this.enemyBullets.getFirstExists(false);
+        enemyBullet.reset(source.x, source.y);
+        enemyBullet.body.velocity.x = this.bulletSpeed * dir;
+
+    }*/
     /*if (this.game.time.time < this.nextFire) { return; }
 
     var x = source.x + 10;
@@ -130,15 +150,20 @@ Weapon.BalaSimple.prototype.hit = function (obj1, obj2) {
 //Misil simple que acelera en la posicion actual
 Weapon.Misil = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Misil', false, true, Phaser.Physics.ARCADE);
+    this.bullets = game.add.group();
+    this.bullets.enableBody = true;
+    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.bullets.createMultiple(64, 'bullet5');
+    this.bullets.setAll('anchor.x', 0,5);
+    this.bullets.setAll('anchor.y', 0.5);
+    this.bullets.setAll('checkWorldBounds', true);
+    this.bullets.setAll('outOfBoundsKill', true);
 
+    this.game = game;
     this.nextFire = 0;
-    this.bulletSpeed = 20;
+    this.nextEnemyFire = 0;
+    this.bulletSpeed = 200;
     this.fireRate = 1000;
-
-    for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet5'), true);
-    }
 
     return this;
 
@@ -151,29 +176,50 @@ Weapon.Misil.prototype.fire = function (source, dir) {
 
     if (this.game.time.time < this.nextFire) { return; }
 
-    var x = source.x + 10;
-    var y = source.y + 10;
-
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 1000, 0);
+    if (this.bullets.countDead() == 0) { return; }
 
     this.nextFire = this.game.time.time + this.fireRate;
+    
+    var bullet = this.bullets.getFirstExists(false);
+    bullet.reset(source.x, source.y);
+    bullet.body.velocity.x = this.bulletSpeed * dir;
+
+    /*var x = source.x + 10;
+    var y = source.y + 10;
+
+    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 1000, 0);*/
+
+   
 
 };
+
+Weapon.Misil.prototype.hit = function (obj1, obj2) {
+    obj2.kill();
+    obj1.kill();
+}
 
 //Disparo triple, una bala con angulo superior y otra inferior
 Weapon.Triple = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Triple', false, true, Phaser.Physics.ARCADE);
+    this.bullets = game.add.group();
+    this.bullets.enableBody = true;
+    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.bullets.createMultiple(32, 'bullet7');
+    this.bullets.setAll('anchor.x', 0,5);
+    this.bullets.setAll('anchor.y', 0.5);
+    this.bullets.setAll('checkWorldBounds', true);
+    this.bullets.setAll('outOfBoundsKill', true);
 
+    this.game = game;
     this.nextFire = 0;
     this.bulletSpeed = 400;
     this.fireRate = 400;
 
 
-    for (var i = 0; i < 32; i++) {
+    /*for (var i = 0; i < 32; i++) {
         this.add(new Bullet(game, 'bullet7'), true);
     }
-    return this;
+    return this;*/
 
 };
 
@@ -184,14 +230,30 @@ Weapon.Triple.prototype.fire = function (source, dir) {
 
     if (this.game.time.time < this.nextFire) { return; }
 
-    var x = source.x + 10;
+    if (this.bullets.countDead() == 0) { return };
+
+    this.nextFire = this.game.time.time + this.fireRate;
+    
+    var bullet = this.bullets.getFirstExists(false);
+    bullet.reset(source.x, source.y + 50);
+    bullet.body.velocity.x = this.bulletSpeed * dir;
+    //bullet.body.angle = 340;
+    var bullet1 = this.bullets.getFirstExists(false);
+    bullet1.reset(source.x, source.y);
+    bullet1.body.velocity.x = this.bulletSpeed * dir;
+    var bullet2 = this.bullets.getFirstExists(false);
+    bullet2.reset(source.x, source.y - 50);
+    bullet2.body.velocity.x = this.bulletSpeed * dir;
+    //bullet.body.angle = 20
+
+    /*var x = source.x + 10;
     var y = source.y + 10;
 
     this.getFirstExists(false).fire(x, y+50, 340, this.bulletSpeed * dir, 0, 0);
     this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 0);
     this.getFirstExists(false).fire(x, y-50, 20, this.bulletSpeed * dir, 0, 0);
-
-    this.nextFire = this.game.time.time + this.fireRate;
+*/
+    
 
 };
 
@@ -507,20 +569,29 @@ var SpaceAccountants = function () {
     this.background = null;
     this.foreground = null;
 
+    // Variables de la gestión del nivel
+    this.level = 1;
+    this.levels  = [3];
+    this.currentLevel = 0;
+
     this.player = null;
     this.cursors = null;
     this.speed = 300;
-    this.puntuacion = 1000;
+    this.puntuacion = 1500;
 
     // Variables del enemigo
     this.enemies = null;
     this.nextEnemyAt = 0;
     this.enemyDelay = 1000;
     this.enemyWeapon = null;
+    this.minSpeed = 30;
+    this.maxspeed = 60;
 
     this.weapons = [];
+    this.usable = [9];
     this.currentWeapon = 0;
     this.weaponName = null;
+    this.maxWeapon = 0;
 
 };
 
@@ -537,18 +608,18 @@ SpaceAccountants.prototype = {
 
         //  We need this because the assets are on Amazon S3
         //  Remove the next 2 lines if running locally
-        this.load.baseURL = 'http://files.phaser.io.s3.amazonaws.com/codingtips/issue007/';
-        this.load.crossOrigin = 'anonymous';
+        /*this.load.baseURL = 'http://files.phaser.io.s3.amazonaws.com/codingtips/issue007/';
+        this.load.crossOrigin = 'anonymous';*/
 
         //this.load.image('background', 'assets/backgroud.png');
-        this.load.image('foreground', 'assets/fore.png');
-        this.load.image('player', 'assets/ship.png');
-        this.load.image('enemy1', 'images/enemy1.png');
-        this.load.bitmapFont('shmupfont', 'assets/shmupfont.png', 'assets/shmupfont.xml');
+        this.load.image('foreground', './images/fore.png');
+        this.load.image('player', './images/ship.png');
+        this.load.image('enemy', './images/enemy.png');
+        //this.load.bitmapFont('shmupfont', 'assets/shmupfont.png', 'assets/shmupfont.xml');
 
         
         for (var i = 1; i <= 9; i++) {
-            this.load.image('bullet' + i, 'assets/bullet' + i + '.png');
+            this.load.image('bullet' + i, './images/bullet' + i + '.png');
         }
         //this.load.image('bullet5', 'images/bullet.png');
 
@@ -578,6 +649,12 @@ SpaceAccountants.prototype = {
             this.weapons[i].visible = false;
         }
 
+        for (var j = 0; i < this.levels.length; j++) {
+            this.usable[i] = false;
+        }
+
+        this.usable[0] = true;
+
         //Crea sprite jugador, activa sus fisicas y la colision con el mundo
         this.player = this.add.sprite(64, 200, 'player');
         this.physics.arcade.enable(this.player);
@@ -592,15 +669,14 @@ SpaceAccountants.prototype = {
         this.enemies.setAll('anchor.y', 0.5);
         this.enemies.setAll('checkWorldBounds', true);
         this.enemies.setAll('outOfBoundsKill', true);
-        
-        //this.enemyWeapon = new Weapon.BalaSimple(this.game);
 
         this.foreground = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'foreground');
         this.foreground.autoScroll(-60, 0);
 
-        this.weaponName = this.add.bitmapText(8, 364, 'shmupfont', "ENTER = Cambio de arma", 24);
-        this.weaponName = this.add.bitmapText(8, 340, 'shmupfont', "SPACEBAR = Disparo", 24);
-        this.weaponName = this.add.bitmapText(8, 316, 'shmupfont', "FLECHAS = Movimiento", 24);
+        /*this.weaponName = this.add.bitmapText(8, 364, 'shmupfont', "ENTER = Cambio de arma", 18);
+        this.weaponName = this.add.bitmapText(8, 340, 'shmupfont', "SPACEBAR = Disparo", 18);
+        this.weaponName = this.add.bitmapText(8, 316, 'shmupfont', "FLECHAS = Movimiento", 18);
+        this.weaponName = this.add.bitmapText(8, 292, 'shmupfont', "NIVEL = " + this.level, 18);*/
 
 
         //Cursores para moverse y espacio para disparar
@@ -610,7 +686,7 @@ SpaceAccountants.prototype = {
         //Controles del cambio de arma
         var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
         changeKey.onDown.add(this.nextWeapon, this);
-
+        
     },
 
     nextEnemy: function() {
@@ -619,7 +695,7 @@ SpaceAccountants.prototype = {
             this.nextEnemyAt = this.time.now + this.enemyDelay;
             var enemy = this.enemies.getFirstExists(false);
             enemy.reset (600 , this.rnd.integerInRange(20, 780));
-            enemy.body.velocity.x = this.rnd.integerInRange(30, 60) * -1;
+            enemy.body.velocity.x = this.rnd.integerInRange(this.minSpeed, this.maxspeed) * -1;
         }
     },
 
@@ -632,45 +708,65 @@ SpaceAccountants.prototype = {
     },
 
     nextWeapon: function () {
-
-        //  Reinicia al arma
-        if (this.currentWeapon > 9) {
-            this.weapons[this.currentWeapon].reset();
-        }
-        else {
-            //Debug: Elimina arma antigua
-            //this.weapons[this.currentWeapon].visible = false;
-            //this.weapons[this.currentWeapon].callAll('reset', null, 0, 0);
-            //this.weapons[this.currentWeapon].setAll('exists', false);
-        }
-
-        //  Activa nuevo arma
+        this.maxWeapon = this.puntuacion / 500;
         this.currentWeapon++;
-
-        if (this.currentWeapon === this.weapons.length) {
+        //  Reinicia al arma
+        if (this.currentWeapon > this.maxWeapon) {
             this.currentWeapon = 0;
         }
-
         this.weapons[this.currentWeapon].visible = true;
-
-        this.weaponName.text = this.weapons[this.currentWeapon].name;
+    },
+    
+    nextLevel: function() {
+        var limitScore = 1000;
+        if (this.puntuacion >= limitScore) {
+           this.level++;
+        }
 
     },
 
     // Al detectar la colisión jugador con enemigo (más adelante servirá para jugador, bala enemigo), se lla a este método
     playerHit: function (player, enemy) {
         enemy.kill();
-        this.puntuacion -= 50;
-        if (this.puntuacion < 1000)
-            console.log(this.puntuacion);
+        this.puntuacion -= 150;
     }, 
 
     // Al detectar la colisión bala con enemigo, se llama a este método
     enemyHit: function(bullet, enemy) {
         console.log('colision');
-        bullet.kill();
+        if (this.currentWeapon == 0){
+            bullet.kill();
+        }
         enemy.kill();
         this.puntuacion += 100;
+    },
+
+    scoreEffects: function() {
+        this.weapons[0].bulletSpeed = 600;
+        this.speed = 300;
+
+        // Efectos de score negativos
+        if (this.puntuacion <= -50) {
+            this.weapons[0].bulletSpeed = 300;
+            
+            console.log('menos velocidad bala');
+        }
+
+        if (this.puntuacion <= -100) {
+            this.speed = 150;
+        }
+
+        // Efectos positivos
+        if (this.puntuacion <= 500){
+            this.usable[1] = true;
+        }
+    },
+
+    levelsEffects : function() {
+        if (this.level == 2){
+            this.minSpeed = 100;
+            this.maxspeed = 130;
+        }
     },
 
     update: function () {
@@ -703,11 +799,14 @@ SpaceAccountants.prototype = {
         }
 
         if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-            this.weapons[this.currentWeapon].fire(this.player, 1);
+            this.weapons[this.currentWeapon].fire(this.player, 1, this.usable[this.currentWeapon]);
         }
 
         //this.enemy1.body.velocity.x = -this.enemySpeed;
         //this.enemyWeapon.fire(this.enemy1, -1);
+        this.nextLevel();
+        this.levelsEffects();
+        this.scoreEffects();
 
     },
 

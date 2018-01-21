@@ -1,6 +1,6 @@
 'use strict';
 
-var game = new Phaser.Game(640, 400, Phaser.AUTO, 'game');
+var game = new Phaser.Game(840, 400, Phaser.AUTO, 'game');
 
 //Sprite con propiedades, todas las armas lo usan
 var Bullet = function (game, key) {
@@ -117,9 +117,12 @@ Weapon.BalaSimple.prototype.fire = function (source, dir) {
     this.nextFire = this.game.time.now + this.fireRate;
     this.nextEnemyFire = this.game.time.now + this.fireRate;
 
+    var x = source.x + 10;
+    var y = source.y + 10;
+
     // Hacemos el disparo: 1. Cogemos una bala 2. La ponemos en las coordenadas del "disparador" 3. Le damos velocidad
     var bullet = this.bullets.getFirstExists(false);
-    bullet.reset(source.x, source.y);
+    bullet.reset(x, y);
     bullet.body.velocity.x = this.bulletSpeed * dir;
      /*else {
         var enemyBullet = this.enemyBullets.getFirstExists(false);
@@ -129,21 +132,13 @@ Weapon.BalaSimple.prototype.fire = function (source, dir) {
     }*/
     /*if (this.game.time.time < this.nextFire) { return; }
 
-    var x = source.x + 10;
-    var y = source.y + 10;
+    
 
     // getFirstExists(false): Busca en el grupo bala el primer objeto no existente para crearlo
     this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 0);
 
     this.nextFire = this.game.time.time + this.fireRate;*/
 
-
-};
-
-Weapon.BalaSimple.prototype.hit = function (obj1, obj2) {
-    console.log('colision');
-    obj2.kill();
-    obj1.kill();
 
 };
 
@@ -180,12 +175,14 @@ Weapon.Misil.prototype.fire = function (source, dir) {
 
     this.nextFire = this.game.time.time + this.fireRate;
     
+    var x = source.x + 10;
+    var y = source.y + 10;
+
     var bullet = this.bullets.getFirstExists(false);
-    bullet.reset(source.x, source.y);
+    bullet.reset(x, y);
     bullet.body.velocity.x = this.bulletSpeed * dir;
 
-    /*var x = source.x + 10;
-    var y = source.y + 10;
+    /*
 
     this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 1000, 0);*/
 
@@ -215,11 +212,7 @@ Weapon.Triple = function (game) {
     this.bulletSpeed = 400;
     this.fireRate = 400;
 
-
-    /*for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, 'bullet7'), true);
-    }
-    return this;*/
+    return this;
 
 };
 
@@ -233,45 +226,47 @@ Weapon.Triple.prototype.fire = function (source, dir) {
     if (this.bullets.countDead() == 0) { return };
 
     this.nextFire = this.game.time.time + this.fireRate;
+
+    var x = source.x + 10;
+    var y = source.y + 10;
     
     var bullet = this.bullets.getFirstExists(false);
-    bullet.reset(source.x, source.y + 50);
+    bullet.reset(x, y);
     bullet.body.velocity.x = this.bulletSpeed * dir;
-    //bullet.body.angle = 340;
+    bullet.body.velocity.y = this.bulletSpeed/3 * -1;
+    
     var bullet1 = this.bullets.getFirstExists(false);
-    bullet1.reset(source.x, source.y);
+    bullet1.reset(x, y);
     bullet1.body.velocity.x = this.bulletSpeed * dir;
     var bullet2 = this.bullets.getFirstExists(false);
-    bullet2.reset(source.x, source.y - 50);
+    bullet2.reset(x, y);
     bullet2.body.velocity.x = this.bulletSpeed * dir;
-    //bullet.body.angle = 20
-
-    /*var x = source.x + 10;
-    var y = source.y + 10;
-
-    this.getFirstExists(false).fire(x, y+50, 340, this.bulletSpeed * dir, 0, 0);
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 0);
-    this.getFirstExists(false).fire(x, y-50, 20, this.bulletSpeed * dir, 0, 0);
-*/
-    
+    bullet2.body.velocity.y = this.bulletSpeed/3;
 
 };
 
 //Dispara en 8 direcciones
 Weapon.EightWay = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Eight Way', false, true, Phaser.Physics.ARCADE);
+    this.bullets = game.add.group();
+    /*this.bullets.enableBody = true;
+    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.bullets.createMultiple(1, 'bullet5');
+    this.bullets.setAll('anchor.x', 0,5);
+    this.bullets.setAll('anchor.y', 0.5);
+    this.bullets.setAll('checkWorldBounds', true);
+    this.bullets.setAll('outOfBoundsKill', true);*/
 
+    this.game = game;
     this.nextFire = 0;
     this.bulletSpeed = 200;
     this.fireRate = 100;
 
-    for (var i = 0; i < 96; i++) {
-        this.add(new Bullet(game, 'bullet5'), true);
+    for (var i = 0; i < 32; i++){
+        this.bullets.add(new Bullet(game, 'bullet5') , true);
     }
 
     return this;
-
 };
 
 Weapon.EightWay.prototype = Object.create(Phaser.Group.prototype);
@@ -281,34 +276,64 @@ Weapon.EightWay.prototype.fire = function (source , dir) {
 
     if (this.game.time.time < this.nextFire) { return; }
 
+    if (this.bullets.countDead() == 0) { return };
+
+    this.nextFire = this.game.time.time + this.fireRate;
+
+    /*var bullet = this.bullets.getFirstExists(false);
+    bullet.fire(source.x, source.y, 0, this.bulletSpeed * dir, 1000, 0);
+    //bullet.body.angle = 340;
+    var bullet1 = this.bullets.getFirstExists(false);
+    bullet1.fire(source.x, source.y, 45, this.bulletSpeed * dir, 1000, 0);
+    //bullet1.body.velocity.x = this.bulletSpeed * dir;
+    var bullet2 = this.bullets.getFirstExists(false);
+    bullet2.fire(source.x, source.y, 90, this.bulletSpeed * dir, 1000, 0);
+    //bullet2.reset(source.x, source.y - 50);
+    //bullet2.body.velocity.x = this.bulletSpeed * dir;
+    //bullet.body.angle = 20
+    var bullet3 = this.bullets.getFirstExists(false);
+    bullet3.fire(source.x, source.y, 135, this.bulletSpeed * dir, 1000, 0);
+    var bullet4 = this.bullets.getFirstExists(false);
+    bullet4.fire(source.x, source.y, 180, this.bulletSpeed * dir, 1000, 0);
+    var bullet5 = this.bullets.getFirstExists(false);
+    bullet5.fire(source.x, source.y, 225, this.bulletSpeed * dir, 1000, 0);
+    var bullet6 = this.bullets.getFirstExists(false);
+    bullet6.fire(source.x, source.y, 270, this.bulletSpeed * dir, 1000, 0);
+    var bullet7 = this.bullets.getFirstExists(false);
+    bullet7.fire(source.x, source.y, 315, this.bulletSpeed * dir, 1000, 0);*/
+
     var x = source.x + 16;
     var y = source.y + 10;
 
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 45, this.bulletSpeed * dir, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 90, this.bulletSpeed * dir, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 135, this.bulletSpeed * dir, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 180, this.bulletSpeed * dir, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 225, this.bulletSpeed * dir, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 270, this.bulletSpeed * dir, 1000, 0);
-    this.getFirstExists(false).fire(x, y, 315, this.bulletSpeed * dir, 1000, 0);
+    this.bullets.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 1000, 0);
+    this.bullets.getFirstExists(false).fire(x, y, 45, this.bulletSpeed * dir, 1000, 0);
+    this.bullets.getFirstExists(false).fire(x, y, 90, this.bulletSpeed * dir, 1000, 0);
+    this.bullets.getFirstExists(false).fire(x, y, 135, this.bulletSpeed * dir, 1000, 0);
+    this.bullets.getFirstExists(false).fire(x, y, 180, this.bulletSpeed * dir, 1000, 0);
+    this.bullets.getFirstExists(false).fire(x, y, 225, this.bulletSpeed * dir, 1000, 0);
+    this.bullets.getFirstExists(false).fire(x, y, 270, this.bulletSpeed * dir, 1000, 0);
+    this.bullets.getFirstExists(false).fire(x, y, 315, this.bulletSpeed * dir, 1000, 0);
 
-    this.nextFire = this.game.time.time + this.fireRate;
+    //this.nextFire = this.game.time.time + this.fireRate;
 
 };
 
 //Disparo de dispersion, se desvia ligeramente de manera aleatoria
 Weapon.ScatterShot = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Scatter Shot', false, true, Phaser.Physics.ARCADE);
+    this.bullets = game.add.group();
+    this.bullets.enableBody = true;
+    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.bullets.createMultiple(64, 'bullet5');
+    this.bullets.setAll('anchor.x', 0,5);
+    this.bullets.setAll('anchor.y', 0.5);
+    this.bullets.setAll('checkWorldBounds', true);
+    this.bullets.setAll('outOfBoundsKill', true);
 
+    this.game = game;
     this.nextFire = 0;
     this.bulletSpeed = 600;
     this.fireRate = 40;
-
-    for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, 'bullet5'), true);
-    }
 
     return this;
 
@@ -321,12 +346,18 @@ Weapon.ScatterShot.prototype.fire = function (source, dir) {
 
     if (this.game.time.time < this.nextFire) { return; }
 
+    if (this.bullets.countDead() == 0) { return; }
+
+    this.nextFire = this.game.time.time + this.fireRate;
+
     var x = source.x + 16;
     var y = (source.y + source.height / 2) + this.game.rnd.between(-10, 10);
 
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 0);
+    var bullet = this.bullets.getFirstExists(false);
+    bullet.reset(x, y);
+    bullet.body.velocity.x = this.bulletSpeed * dir;
 
-    this.nextFire = this.game.time.time + this.fireRate;
+   
 
 };
 
@@ -336,15 +367,21 @@ Weapon.ScatterShot.prototype.fire = function (source, dir) {
 
 Weapon.Beam = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Beam', false, true, Phaser.Physics.ARCADE);
+    this.bullets = game.add.group();
+    this.bullets.enableBody = true;
+    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.bullets.createMultiple(64, 'bullet3');
+    this.bullets.setAll('anchor.x', 0,5);
+    this.bullets.setAll('anchor.y', 0.5);
+    this.bullets.setAll('checkWorldBounds', true);
+    this.bullets.setAll('outOfBoundsKill', true);
+    this.bullets.name = 'Beam';
+    console.log(this.bullets.name);
 
+    this.game = game;
     this.nextFire = 0;
     this.bulletSpeed = 1000;
     this.fireRate = 4;
-
-    for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet6'), true);
-    }
 
     return this;
 
@@ -357,12 +394,16 @@ Weapon.Beam.prototype.fire = function (source, dir) {
 
     if (this.game.time.time < this.nextFire) { return; }
 
+    if (this.bullets.countDead() == 0) { return; }
+
+    this.nextFire = this.game.time.time + this.fireRate;
+
     var x = source.x + 40;
     var y = source.y + 10;
 
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 0);
-
-    this.nextFire = this.game.time.time + this.fireRate;
+    var bullet = this.bullets.getFirstExists(false);
+    bullet.reset(x, y);
+    bullet.body.velocity.x = this.bulletSpeed * dir;
 
 };
 
@@ -372,15 +413,21 @@ Weapon.Beam.prototype.fire = function (source, dir) {
 
 Weapon.SplitShot = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Split Shot', false, true, Phaser.Physics.ARCADE);
+    this.bullets = game.add.group();
+    this.bullets.enableBody = true;
+    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.bullets.createMultiple(128, 'bullet8');
+    this.bullets.setAll('anchor.x', 0,5);
+    this.bullets.setAll('anchor.y', 0.5);
+    this.bullets.setAll('checkWorldBounds', true);
+    this.bullets.setAll('outOfBoundsKill', true);
+    this.name = 'SplitShot';
+
+    this.game = game;
 
     this.nextFire = 0;
     this.bulletSpeed = 700;
     this.fireRate = 40;
-
-    for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet8'), true);
-    }
 
     return this;
 
@@ -393,14 +440,25 @@ Weapon.SplitShot.prototype.fire = function (source, dir) {
 
     if (this.game.time.time < this.nextFire) { return; }
 
+    if (this.bullets.countDead() == 0) { return };
+
+    this.nextFire = this.game.time.time + this.fireRate;
+
     var x = source.x + 20;
     var y = source.y + 10;
 
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, -500);
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 0);
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 500);
-
-    this.nextFire = this.game.time.time + this.fireRate;
+    var bullet = this.bullets.getFirstExists(false);
+    bullet.reset(x, y);
+    bullet.body.velocity.x = this.bulletSpeed * dir;
+    bullet.body.velocity.y = this.bulletSpeed * -0.1;
+    
+    var bullet1 = this.bullets.getFirstExists(false);
+    bullet1.reset(x, y);
+    bullet1.body.velocity.x = this.bulletSpeed * dir;
+    var bullet2 = this.bullets.getFirstExists(false);
+    bullet2.reset(x, y);
+    bullet2.body.velocity.x = this.bulletSpeed * dir;
+    bullet2.body.velocity.y = this.bulletSpeed * 0.1;
 
 };
 
@@ -577,7 +635,7 @@ var SpaceAccountants = function () {
     this.player = null;
     this.cursors = null;
     this.speed = 300;
-    this.puntuacion = 1500;
+    this.puntuacion = 20000;
 
     // Variables del enemigo
     this.enemies = null;
@@ -588,10 +646,10 @@ var SpaceAccountants = function () {
     this.maxspeed = 60;
 
     this.weapons = [];
-    this.usable = [9];
     this.currentWeapon = 0;
     this.weaponName = null;
     this.maxWeapon = 0;
+    this.newWeapon = 0;
 
 };
 
@@ -649,12 +707,6 @@ SpaceAccountants.prototype = {
             this.weapons[i].visible = false;
         }
 
-        for (var j = 0; i < this.levels.length; j++) {
-            this.usable[i] = false;
-        }
-
-        this.usable[0] = true;
-
         //Crea sprite jugador, activa sus fisicas y la colision con el mundo
         this.player = this.add.sprite(64, 200, 'player');
         this.physics.arcade.enable(this.player);
@@ -690,7 +742,6 @@ SpaceAccountants.prototype = {
     },
 
     nextEnemy: function() {
-        console.log ('Enemigo Generado');
         if (this.nextEnemyAt < this.time.now && this.enemies.countDead() > 0) {
             this.nextEnemyAt = this.time.now + this.enemyDelay;
             var enemy = this.enemies.getFirstExists(false);
@@ -708,12 +759,22 @@ SpaceAccountants.prototype = {
     },
 
     nextWeapon: function () {
+        // Esta varible nos sirve para hacer la restrincción del uso de las armas
+        // Si llegamos a los 500 puntos, tendremos los misiles 
+        // *(es decir 500/500 = 1 luego weapons[1] = miles)*
         this.maxWeapon = this.puntuacion / 500;
+
+        // Solo tenemos 9 armas, luego si superamos el los 1999 puntos tenemos que 
+        if (this.maxWeapon >= 10) {
+            this.maxWeapon = 9;
+        }
+
         this.currentWeapon++;
         //  Reinicia al arma
         if (this.currentWeapon > this.maxWeapon) {
             this.currentWeapon = 0;
         }
+        console.log(this.currentWeapon);
         this.weapons[this.currentWeapon].visible = true;
     },
     
@@ -733,7 +794,6 @@ SpaceAccountants.prototype = {
 
     // Al detectar la colisión bala con enemigo, se llama a este método
     enemyHit: function(bullet, enemy) {
-        console.log('colision');
         if (this.currentWeapon == 0){
             bullet.kill();
         }
@@ -748,18 +808,13 @@ SpaceAccountants.prototype = {
         // Efectos de score negativos
         if (this.puntuacion <= -50) {
             this.weapons[0].bulletSpeed = 300;
-            
-            console.log('menos velocidad bala');
         }
 
         if (this.puntuacion <= -100) {
             this.speed = 150;
         }
 
-        // Efectos positivos
-        if (this.puntuacion <= 500){
-            this.usable[1] = true;
-        }
+
     },
 
     levelsEffects : function() {
@@ -771,8 +826,8 @@ SpaceAccountants.prototype = {
 
     update: function () {
 
+        this.speed = 300;
         this.player.body.velocity.set(0);
-        console.log('puntuacion');
 
         this.nextEnemy();
         //this.enemyFire();
@@ -782,9 +837,13 @@ SpaceAccountants.prototype = {
         this.physics.arcade.overlap(this.weapons[this.currentWeapon].bullets, this.enemies, this.enemyHit, null, this);
 
         // Detección de input :: Al implementar la clase de jugador aquí solo sería hacer llamada a this.playe.input(cursors, fireButton);
+        if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+            this.speed = 200;
+            this.weapons[this.currentWeapon].fire(this.player, 1);
+           
+        }
         if (this.cursors.left.isDown) {
             this.player.body.velocity.x = -this.speed;
-            console.log('Pulsado');
         }
 
         else if (this.cursors.right.isDown) {
@@ -798,9 +857,7 @@ SpaceAccountants.prototype = {
             this.player.body.velocity.y = this.speed;
         }
 
-        if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-            this.weapons[this.currentWeapon].fire(this.player, 1, this.usable[this.currentWeapon]);
-        }
+        
 
         //this.enemy1.body.velocity.x = -this.enemySpeed;
         //this.enemyWeapon.fire(this.enemy1, -1);

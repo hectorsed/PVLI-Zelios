@@ -649,15 +649,22 @@ var SpaceAccountants = function () {
     this.background = null;
     this.foreground = null;
 
-    // Variables de la gestión del nivel
-    this.level = 3;
-    this.levels  = [3];
-    this.currentLevel = 0;
+    // CANVAS
+    // Variables del texto del canvas
+    this.level = 1;
+    this.levelString = '';
+    this.levelTexte = null;
+    this.puntuacion = 0;
+    this.score = null;
+    this.scoreString = '';
+    this.scoreTexte = null;
 
+
+    // JUGADOR
     this.player = null;
     this.cursors = null;
     this.speed = 300;
-    this.puntuacion = 19303;
+    this.puntuacion = 0;
 
     // ENEMIGOS
     // Variables de enemigos que avanzan hacia la izquierda (desde el nivel 1)
@@ -678,12 +685,12 @@ var SpaceAccountants = function () {
     this.nextEnemy2At = 0;
     this.enemy2Delay = 1000;
 
+    // ARMAS Y DISPAROS
     this.weapons = [];
     this.currentWeapon = 0;
     this.weaponName = null;
     this.maxWeapon = 0;
     this.newWeapon = 0;
-
 };
 
 SpaceAccountants.prototype = {
@@ -697,33 +704,24 @@ SpaceAccountants.prototype = {
 
     preload: function () {
 
-        //  We need this because the assets are on Amazon S3
-        //  Remove the next 2 lines if running locally
         /*this.load.baseURL = 'http://files.phaser.io.s3.amazonaws.com/codingtips/issue007/';
         this.load.crossOrigin = 'anonymous';*/
 
-        //this.load.image('background', 'assets/backgroud.png');
         this.load.image('foreground', './images/fore.png');
         this.load.image('player', './images/ship.png');
         this.load.image('enemy', './images/enemy.png');
         this.load.image('enemy1', './images/enemy1.png');
         //this.load.bitmapFont('shmupfont', 'assets/shmupfont.png', 'assets/shmupfont.xml');
 
-        
         for (var i = 1; i <= 9; i++) {
             this.load.image('bullet' + i, './images/bullet' + i + '.png');
         }
-        //this.load.image('bullet5', 'images/bullet.png');
-
-        //  Note: Graphics are not for use in any commercial project
-
     },
 
     create: function () {
 
-        //this.background = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
-        //this.background.autoScroll(-40, 0);
-
+        // CREACIÓN DE ARMAS
+        // Creamos todas las armas del jugador
         this.weapons.push(new Weapon.BalaSimple(this.game));
         this.weapons.push(new Weapon.Misil(this.game));
         this.weapons.push(new Weapon.Triple(this.game));
@@ -734,20 +732,30 @@ SpaceAccountants.prototype = {
         this.weapons.push(new Weapon.Pattern(this.game));
         this.weapons.push(new Weapon.Rockets(this.game));
         this.weapons.push(new Weapon.ScaleBullet(this.game));
-
         this.currentWeapon = 0;
 
         for (var i = 1; i < this.weapons.length; i++) {
             this.weapons[i].visible = false;
         }
 
+        // Creación del arma del enmigo
         this.enemyWeapon = new Weapon.Triple(this.game);
 
+        // JUGADOR
         //Crea sprite jugador, activa sus fisicas y la colision con el mundo
         this.player = this.add.sprite(64, 200, 'player');
         this.physics.arcade.enable(this.player);
         this.player.body.collideWorldBounds = true;
 
+        //Cursores para moverse y espacio para disparar
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
+
+        //Controles del cambio de arma
+        var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+        changeKey.onDown.add(this.nextWeapon, this);
+
+        // ENEMIGOS
         // Crea un grupo de enemigos, activa sus físicas y la colision con el mundo
         this.enemies = game.add.group();
         this.enemies.enableBody = true;
@@ -757,7 +765,8 @@ SpaceAccountants.prototype = {
         this.enemies.setAll('anchor.y', 0.5);
         this.enemies.setAll('checkWorldBounds', true);
         this.enemies.setAll('outOfBoundsKill', true);
-
+        
+        // Crea un segundo grupo de enemigos
         this.enemies1 = game.add.group();
         this.enemies1.enableBody = true;
         this.enemies1.physicsBodyType = Phaser.Physics.ARCADE;
@@ -767,22 +776,19 @@ SpaceAccountants.prototype = {
         this.enemies1.setAll('checkWorldBounds', true);
         this.enemies1.setAll('outOfBoundsKill', true);
 
+        // OTROS ELEMENTOS
         this.foreground = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'foreground');
         this.foreground.autoScroll(-60, 0);
 
-        /*this.weaponName = this.add.bitmapText(8, 364, 'shmupfont', "ENTER = Cambio de arma", 18);
+        this.scoreString = 'Score : ';
+        this.scoreTexte = this.add.text(10, 10, this.scoreString + this.puntuacion, {font: '34px Arial', fill: '#fff'});
+        /*this.weaponName = this.add.bitmapTex t(8, 364, 'shmupfont', "ENTER = Cambio de arma", 18);
         this.weaponName = this.add.bitmapText(8, 340, 'shmupfont', "SPACEBAR = Disparo", 18);
         this.weaponName = this.add.bitmapText(8, 316, 'shmupfont', "FLECHAS = Movimiento", 18);
         this.weaponName = this.add.bitmapText(8, 292, 'shmupfont', "NIVEL = " + this.level, 18);*/
 
 
-        //Cursores para moverse y espacio para disparar
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
-
-        //Controles del cambio de arma
-        var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-        changeKey.onDown.add(this.nextWeapon, this);
+        
         
     },
 
@@ -798,13 +804,11 @@ SpaceAccountants.prototype = {
 
         // Creación de enemigos que empiezan a salir en distintos niveles
         if (this.level > 1) {
-            //console.log(this.enemies1.countDead());
             if (this.nextEnemy1At < this.time.now && this.enemies1.countDead() > 0) {
                 this.nextEnemy1At = this.time.now + this.enemy1Delay;
                 var enemy1 = this.enemies1.getFirstExists(false);
                 enemy1.reset (this.rnd.integerInRange(20, 780) , 0);
                 enemy1.body.velocity.y = this.rnd.integerInRange(this.minSpeed1, this.maxspeed1) * 1;
-                console.log("generado");
             }
             
             if (this.level > 2){
@@ -818,14 +822,6 @@ SpaceAccountants.prototype = {
                 }
             }
         }
-    },
-
-    enemyFire: function(){
-        this.enemies.forEachAlive(function(enemy) { this.weapons[0].fire(enemy, -1) }, this);
-        /*if (this.enemies.countDead() > 0) {
-            var enemy = this.enemies.getFirstExists(false);
-            
-        }*/
     },
 
     nextWeapon: function () {
@@ -862,7 +858,8 @@ SpaceAccountants.prototype = {
     // Al detectar la colisión jugador con enemigo (más adelante servirá para jugador, bala enemigo), se lla a este método
     playerHit: function (player, enemy) {
         enemy.kill();
-        this.puntuacion -= 300;
+        this.puntuacion -= 75;
+        this.scoreTexte.text = this.scoreString + this.puntuacion;
     }, 
 
     // Al detectar la colisión bala con enemigo, se llama a este método
@@ -874,12 +871,14 @@ SpaceAccountants.prototype = {
         this.enemyWeapon.fire(enemy, -1);
         enemy.kill();
         this.puntuacion += 100;
+        this.scoreTexte.text = this.scoreString + this.puntuacion;
     },
     
     enemy1Hit: function(bullet, enemy) {
         bullet.kill();
         enemy.body.velocity.x = -700;
-        enemy.body.velocity.y = 0
+        enemy.body.velocity.y = 0;
+        this.scoreTexte.text = this.scoreString + this.puntuacion;
     },
 
     scoreEffects: function() {
@@ -893,7 +892,7 @@ SpaceAccountants.prototype = {
             this.weapons[0].bulletSpeed = this.weapons[0].bulletSpeed / reduces;
             this.weapons[0].fireRate = this.weapons[0].fireRate * reduces;
 
-            if (this.puntuacion <= -100) {
+            if (this.puntuacion <= -150) {
                 this.speed = this.speed/reduces;
 
                 if (this.puntuacion <= -200){
@@ -919,19 +918,7 @@ SpaceAccountants.prototype = {
         this.physics.arcade.overlap(this.player, this.enemyWeapon.bullets, this.playerHit, null, this);
     },
 
-    update: function () {
-        this.speed = 300;
-        this.player.body.velocity.set(0);
-
-        this.nextEnemy();
-        //this.enemyFire();
-
-        // Sistema de colisiones :: Para que sea más "bonito" podemos hacer otro método en la clase que recoja todas las llamadas y en el main solo llamar a ese método
-        this.colisionEffects();
-        this.levelsEffects();
-        this.scoreEffects();
-
-        // Detección de input :: Al implementar la clase de jugador aquí solo sería hacer llamada a this.playe.input(cursors, fireButton);
+    playerInput: function() {
         if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
             this.weapons[this.currentWeapon].fire(this.player, 1);
            
@@ -950,15 +937,18 @@ SpaceAccountants.prototype = {
         else if (this.cursors.down.isDown) {
             this.player.body.velocity.y = this.speed;
         }
+    }, 
 
-        
-        //this.nextLevel();
-        
-        
+    update: function () {
+        this.speed = 300;
+        this.player.body.velocity.set(0);
 
+        this.nextEnemy();
+        this.colisionEffects();
+        //this.levelsEffects();
+        this.scoreEffects();
+        this.playerInput();
     },
-
-    
 };
 
 game.state.add('Game', SpaceAccountants, true);

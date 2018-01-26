@@ -465,7 +465,6 @@ Weapon.Pattern.prototype.fire = function (source, dir) {
 
 Weapon.Rockets = function (game) {
 
-    //Phaser.Group.call(this, game, game.world, 'Rockets', false, true, Phaser.Physics.ARCADE);
     this.bullets = game.add.group();
     this.bullets.enableBody = true;
     this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -475,18 +474,13 @@ Weapon.Rockets = function (game) {
     this.bullets.setAll('checkWorldBounds', true);
     this.bullets.setAll('outOfBoundsKill', true);
     this.bullets.setAll('tracking', true);
+    this.name = 'Rockets';
 
     this.game = game;
     this.nextFire = 0;
     this.bulletSpeed = 400;
     this.fireRate = 250;
 
-    /*for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, 'bullet5'), true);
-    }
-
-    this.setAll('tracking', true);
-    */
     return this;
 
 };
@@ -514,14 +508,8 @@ Weapon.Rockets.prototype.fire = function (source, dir) {
     bullet1.reset(x,y);
     bullet1.body.velocity.x = this.bulletSpeed * dir;
     bullet1.body.velocity.y = this.bulletSpeed * -1;
-    /*this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, -700);
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, 700);*/
-
-    
-
 };
 
-//Bala que aumenta de tamaño conforme avanza
 Weapon.ScaleBullet = function (game) {
 
     Phaser.Group.call(this, game, game.world, 'Scale Bullet', false, true, Phaser.Physics.ARCADE);
@@ -534,7 +522,7 @@ Weapon.ScaleBullet = function (game) {
     this.bullets.setAll('anchor.y', 0.5);
     this.bullets.setAll('checkWorldBounds', true);
     this.bullets.setAll('outOfBoundsKill', true);
-    this.name = 'Scale Bullet';
+    this.name = 'Wave Bullet';
 
     this.game = game;
 
@@ -617,10 +605,12 @@ var SpaceAccountants = function () {
     this.level = 1;
     this.levelString = '';
     this.levelTexte = null;
+
     this.puntuacion = 0;
     this.score = null;
     this.scoreString = '';
     this.scoreTexte = null;
+
     this.weaponName = '';
     this.weaponText = null;
 
@@ -629,14 +619,12 @@ var SpaceAccountants = function () {
     this.player = null;
     this.cursors = null;
     this.speed = 300;
-    this.puntuacion = 0;
 
     // ENEMIGOS
     // Variables de enemigos que avanzan hacia la izquierda (desde el nivel 1)
     this.enemies = null;
     this.nextEnemyAt = 0;
-    this.enemyDelay = 1000;
-    this.enemyWeapon = null;
+    this.enemyDelay = 1000; 
     this.minSpeed = 30;
     this.maxspeed = 60;
 
@@ -651,9 +639,13 @@ var SpaceAccountants = function () {
     this.enemy2Delay = 1000;
 
     // ARMAS Y DISPAROS
+    // Jugador
     this.weapons = [];
     this.currentWeapon = 0;
     this.maxWeapon = 0;
+
+    // Enemigo
+    this.enemyWeapon = null;
 };
 
 SpaceAccountants.prototype = {
@@ -747,14 +739,15 @@ SpaceAccountants.prototype = {
         
         this.weaponName = 'Weapon : ';
         this.weaponText = this.add.text(10, this.game.height - 50, this.weaponName + this.weapons[this.currentWeapon].name, {font: '34px Arial', fill: '#fff'}); 
+
+        this.levelString = 'Level : ';
+        this.levelTexte = this.add.text(this.game.width - 150, 10, this.levelString+ this.level, {font: '34px Arial', fill: '#fff'});
     },
 
     nextEnemy: function() {
-        console.log(this.enemies.countDead());
         if (this.nextEnemyAt < this.time.now && this.enemies.countDead() > 0) {
             this.nextEnemyAt = this.time.now + this.enemyDelay;
             var enemy = this.enemies.getFirstExists(false);
-            console.log(enemy.scale.x);
             enemy.reset (600 , this.rnd.integerInRange(20, 780));
             enemy.body.velocity.x = this.rnd.integerInRange(this.minSpeed, this.maxspeed) * -1;
         }
@@ -804,14 +797,6 @@ SpaceAccountants.prototype = {
 
         // Actualización del canvas
         this.weaponText.text = this.weaponName + this.weapons[this.currentWeapon].name;
-    },
-    
-    nextLevel: function() {
-        var limitScore = 1000;
-        if (this.puntuacion >= limitScore && this.puntuacion < limitScore) {
-           this.level++;
-        }
-
     },
 
     // Al detectar la colisión jugador con enemigo, se llama a este método
@@ -873,6 +858,23 @@ SpaceAccountants.prototype = {
         }
     },
 
+    nextLevel: function() {
+        var limitScore = 1000;
+        if (this.puntuacion == limitScore) {
+           this.level = 2;
+        }
+        else if (this.puntuacion == limitScore * 2)
+            this.level = 3;
+
+        else if (this.puntuacion == limitScore * 3)
+            this.level = 4;
+
+        else if (this.puntuacion == limitScore * 4)
+            this.level = 5;
+
+        // Actualización del canvas
+        this.levelTexte.text = this.levelString + this.level;
+    },
     levelsEffects : function() {
         if (this.level == 2){
             this.minSpeed = 100;

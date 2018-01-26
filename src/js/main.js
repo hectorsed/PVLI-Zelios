@@ -313,9 +313,7 @@ Weapon.ScatterShot.prototype.fire = function (source, dir) {
 
 };
 
-//////////////////////////////////////////////////////////////////////////
-//  Fires a streaming beam of lazers, very fast, in front of the player //
-//////////////////////////////////////////////////////////////////////////
+// Disparo Láser
 
 Weapon.Beam = function (game) {
 
@@ -358,9 +356,7 @@ Weapon.Beam.prototype.fire = function (source, dir) {
 
 };
 
-///////////////////////////////////////////////////////////////////////
-//  A three-way fire where the top and bottom bullets bend on a path //
-///////////////////////////////////////////////////////////////////////
+//Disparo triple con las balas exteriores curvadas
 
 Weapon.SplitShot = function (game) {
 
@@ -412,9 +408,7 @@ Weapon.SplitShot.prototype.fire = function (source, dir) {
 
 };
 
-///////////////////////////////////////////////////////////////////////
-//  Bullets have Gravity.y set on a repeating pre-calculated pattern //
-///////////////////////////////////////////////////////////////////////
+//Balas que siguen un patrón de dispersion en un vector
 
 Weapon.Pattern = function (game) {
 
@@ -469,9 +463,7 @@ Weapon.Pattern.prototype.fire = function (source, dir) {
     
 };
 
-///////////////////////////////////////////////////////////////////
-//  Rockets that visually track the direction they're heading in //
-///////////////////////////////////////////////////////////////////
+// Disparo en diagonal
 
 Weapon.Rockets = function (game) {
 
@@ -566,45 +558,6 @@ Weapon.ScaleBullet.prototype.fire = function (source, dir) {
 
 };
 
-//  The core game loop
-/*var PlayScene = require('./play_scene.js');
-var ship = require('./ship.js');
-
-var BootScene = {
-    preload: function(){
-
-    },
-
-    create: function(){
-        this.game.state.start('preloader');
-    }
-};
-
-/*var PreloaderScene = {
-    preload: function(){
-
-        // CARGA DE IMÁGENES
-        this.game.load.image('foreground', 'images/fore.png');
-        this.game.load.image('player', 'images/ship.png');
-        this.game.load.image('enemy', 'images/enemy1.png');
-
-        for (var i = 1; i <= 9; i++) {
-            this.load.image('bullet' + i, 'images/bullet' + i + '.png');
-        }
-    }
-    
-};
-
-window.onload = function (){
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
-
-    game.state.add('boot', BootScene);
-    game.state.add('preloader', PreloaderScene);
-    game.state.add('play', PlayScene);
-    //game.state.add('Menu', mainMenu);
-    game.state.start('boot');
-}*/
-
 var SpaceAccountants = function () {
 
     this.background = null;
@@ -670,9 +623,6 @@ SpaceAccountants.prototype = {
 
     preload: function () {
 
-        /*this.load.baseURL = 'http://files.phaser.io.s3.amazonaws.com/codingtips/issue007/';
-        this.load.crossOrigin = 'anonymous';*/
-
         this.load.image('foreground', './images/fore.png');
         this.load.image('player', './images/ship.png');
         this.load.image('enemy', './images/enemy.png');
@@ -688,14 +638,14 @@ SpaceAccountants.prototype = {
         // CREACIÓN DE ARMAS
         // Creamos todas las armas del jugador
         this.weapons.push(new Weapon.BalaSimple(this.game));
+        this.weapons.push(new Weapon.ScatterShot(this.game));
         this.weapons.push(new Weapon.Misil(this.game));
+        this.weapons.push(new Weapon.Rockets(this.game));
         this.weapons.push(new Weapon.Triple(this.game));
         this.weapons.push(new Weapon.EightWay(this.game));
-        this.weapons.push(new Weapon.ScatterShot(this.game));
         this.weapons.push(new Weapon.Beam(this.game));
         this.weapons.push(new Weapon.SplitShot(this.game));
         this.weapons.push(new Weapon.Pattern(this.game));
-        this.weapons.push(new Weapon.Rockets(this.game));
         this.weapons.push(new Weapon.ScaleBullet(this.game));
         this.currentWeapon = 0;
 

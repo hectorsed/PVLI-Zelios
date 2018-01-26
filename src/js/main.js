@@ -741,6 +741,8 @@ SpaceAccountants.prototype = {
             this.weapons[i].visible = false;
         }
 
+        this.enemyWeapon = new Weapon.Triple(this.game);
+
         //Crea sprite jugador, activa sus fisicas y la colision con el mundo
         this.player = this.add.sprite(64, 200, 'player');
         this.physics.arcade.enable(this.player);
@@ -869,13 +871,14 @@ SpaceAccountants.prototype = {
             bullet.kill();
         }
 
+        this.enemyWeapon.fire(enemy, -1);
         enemy.kill();
         this.puntuacion += 100;
     },
     
     enemy1Hit: function(bullet, enemy) {
         bullet.kill();
-        enemy.body.velocity.x = -500;
+        enemy.body.velocity.x = -700;
         enemy.body.velocity.y = 0
     },
 
@@ -913,6 +916,7 @@ SpaceAccountants.prototype = {
         this.physics.arcade.overlap(this.player, this.enemies1, this.playerHit, null, this);
         this.physics.arcade.overlap(this.weapons[this.currentWeapon].bullets, this.enemies, this.enemyHit, null, this);
         this.physics.arcade.overlap(this.weapons[this.currentWeapon].bullets, this.enemies1, this.enemy1Hit, null, this);
+        this.physics.arcade.overlap(this.player, this.enemyWeapon.bullets, this.playerHit, null, this);
     },
 
     update: function () {

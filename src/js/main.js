@@ -154,11 +154,6 @@ Weapon.Misil.prototype.fire = function (source, dir) {
     bullet.body.velocity.x = this.bulletSpeed * dir;
 };
 
-Weapon.Misil.prototype.hit = function (obj1, obj2) {
-    obj2.kill();
-    obj1.kill();
-}
-
 //Disparo triple, una bala con angulo superior y otra inferior
 Weapon.Triple = function (game) {
 
@@ -199,7 +194,6 @@ Weapon.Triple.prototype.fire = function (source, dir) {
     bullet.reset(x, y);
     bullet.body.velocity.x = this.bulletSpeed * dir;
     bullet.body.velocity.y = this.bulletSpeed/3 * -1;
-    
     var bullet1 = this.bullets.getFirstExists(false);
     bullet1.reset(x, y);
     bullet1.body.velocity.x = this.bulletSpeed * dir;
@@ -216,7 +210,7 @@ Weapon.EightWay = function (game) {
     this.bullets = game.add.group();
     this.bullets.enableBody = true;
     this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-    this.bullets.createMultiple(1, 'bullet5');
+    this.bullets.createMultiple(320, 'bullet5');
     this.bullets.setAll('anchor.x', 0,5);
     this.bullets.setAll('anchor.y', 0.5);
     this.bullets.setAll('checkWorldBounds', true);
@@ -226,7 +220,7 @@ Weapon.EightWay = function (game) {
     this.game = game;
     this.nextFire = 0;
     this.bulletSpeed = 200;
-    this.fireRate = 100;
+    this.fireRate = 600;
 
     return this;
 };
@@ -246,26 +240,33 @@ Weapon.EightWay.prototype.fire = function (source , dir) {
     var y = source.y + 10;
 
     var bullet = this.bullets.getFirstExists(false);
-    bullet.fire(source.x, source.y, 0, this.bulletSpeed * dir, 1000, 0);
-    //bullet.body.angle = 340;
+    bullet.reset(x, y);
+    bullet.body.velocity.x = this.bulletSpeed * dir;
     var bullet1 = this.bullets.getFirstExists(false);
-    bullet1.fire(source.x, source.y, 45, this.bulletSpeed * dir, 1000, 0);
-    //bullet1.body.velocity.x = this.bulletSpeed * dir;
+    bullet1.reset(x, y);
+    bullet1.body.velocity.x = this.bulletSpeed * -dir;
     var bullet2 = this.bullets.getFirstExists(false);
-    bullet2.fire(source.x, source.y, 90, this.bulletSpeed * dir, 1000, 0);
-    //bullet2.reset(source.x, source.y - 50);
-    //bullet2.body.velocity.x = this.bulletSpeed * dir;
-    //bullet.body.angle = 20
+    bullet2.reset(x, y);
+    bullet2.body.velocity.y = this.bulletSpeed * -1;
     var bullet3 = this.bullets.getFirstExists(false);
-    bullet3.fire(source.x, source.y, 135, this.bulletSpeed * dir, 1000, 0);
+    bullet3.reset(x, y);
+    bullet3.body.velocity.y = this.bulletSpeed;
     var bullet4 = this.bullets.getFirstExists(false);
-    bullet4.fire(source.x, source.y, 180, this.bulletSpeed * dir, 1000, 0);
+    bullet4.reset(x, y);
+    bullet4.body.velocity.x = this.bulletSpeed * dir;
+    bullet4.body.velocity.y = this.bulletSpeed/3;
     var bullet5 = this.bullets.getFirstExists(false);
-    bullet5.fire(source.x, source.y, 225, this.bulletSpeed * dir, 1000, 0);
+    bullet5.reset(x, y);
+    bullet5.body.velocity.x = this.bulletSpeed * dir;
+    bullet5.body.velocity.y = this.bulletSpeed/3 * -1;
     var bullet6 = this.bullets.getFirstExists(false);
-    bullet6.fire(source.x, source.y, 270, this.bulletSpeed * dir, 1000, 0);
+    bullet6.reset(x, y);
+    bullet6.body.velocity.x = this.bulletSpeed * -dir;
+    bullet6.body.velocity.y = this.bulletSpeed/3 * -1;
     var bullet7 = this.bullets.getFirstExists(false);
-    bullet7.fire(source.x, source.y, 315, this.bulletSpeed * dir, 1000, 0);
+    bullet7.reset(x, y);
+    bullet7.body.velocity.x = this.bulletSpeed * -dir;
+    bullet7.body.velocity.y = this.bulletSpeed/3;
 };
 
 //Disparo de dispersion, se desvia ligeramente de manera aleatoria
@@ -326,7 +327,7 @@ Weapon.Beam = function (game) {
     this.bullets.setAll('anchor.y', 0.5);
     this.bullets.setAll('checkWorldBounds', true);
     this.bullets.setAll('outOfBoundsKill', true);
-    this.bullets.name = 'Beam';
+    this.name = 'Beam';
 
     this.game = game;
     this.nextFire = 0;
@@ -606,7 +607,7 @@ var SpaceAccountants = function () {
     this.levelString = '';
     this.levelTexte = null;
 
-    this.puntuacion = 0;
+    this.puntuacion = 3000;
     this.score = null;
     this.scoreString = '';
     this.scoreTexte = null;
@@ -624,14 +625,14 @@ var SpaceAccountants = function () {
     // Variables de enemigos que avanzan hacia la izquierda (desde el nivel 1)
     this.enemies = null;
     this.nextEnemyAt = 0;
-    this.enemyDelay = 1000; 
+    this.enemyDelay = 10000; 
     this.minSpeed = 30;
     this.maxspeed = 60;
 
     // Variables de enemigos que avanzan hacia arriba (desde el nivel 2)
     this.enemies1 = null;
     this.nextEnemy1At = 0;
-    this.enemy1Delay = 1000;
+    this.enemy1Delay = 1500;
     this.minSpeed1 = 70;
     this.maxspeed1 = 100;
 
@@ -748,27 +749,27 @@ SpaceAccountants.prototype = {
         if (this.nextEnemyAt < this.time.now && this.enemies.countDead() > 0) {
             this.nextEnemyAt = this.time.now + this.enemyDelay;
             var enemy = this.enemies.getFirstExists(false);
-            enemy.reset (600 , this.rnd.integerInRange(20, 780));
+            enemy.reset (600 , this.rnd.integerInRange(100, 700));
             enemy.body.velocity.x = this.rnd.integerInRange(this.minSpeed, this.maxspeed) * -1;
         }
 
         // Creación de enemigos que empiezan a salir en distintos niveles
-        if (this.level > 1) {
-            if (this.nextEnemy1At < this.time.now && this.enemies1.countDead() > 0) {
-                this.nextEnemy1At = this.time.now + this.enemy1Delay;
-                var enemy1 = this.enemies1.getFirstExists(false);
-                enemy1.reset (this.rnd.integerInRange(20, 780) , 0);
-                enemy1.body.velocity.y = this.rnd.integerInRange(this.minSpeed1, this.maxspeed1) * 1;
+        if (this.level > 2) {
+            if (this.nextEnemy2At < this.time.now && this.enemies.countDead() > 0) {
+                this.nextEnemy2At = this.time.now + this.enemy2Delay;
+                var enemy2 = this.enemies.getFirstExists(false);
+                enemy2.scale.x = enemy2.scale.x * -1;
+                enemy2.reset (20 , this.rnd.integerInRange(100, 700));
+                enemy2.body.velocity.x = this.rnd.integerInRange(this.minSpeed, this.maxspeed) * 1;
+            
             }
             
-            if (this.level > 2){
-                if (this.nextEnemy2At < this.time.now && this.enemies.countDead() > 0) {
-                    this.nextEnemy2At = this.time.now + this.enemy2Delay;
-                    var enemy2 = this.enemies.getFirstExists(false);
-                    enemy2.scale.x = enemy2.scale.x * -1;
-                    enemy2.reset (20 , this.rnd.integerInRange(20, 780));
-                    enemy2.body.velocity.x = this.rnd.integerInRange(this.minSpeed, this.maxspeed) * 1;
-    
+            if (this.level > 3){
+                    if (this.nextEnemy1At < this.time.now && this.enemies1.countDead() > 0) {
+                        this.nextEnemy1At = this.time.now + this.enemy1Delay;
+                        var enemy1 = this.enemies1.getFirstExists(false);
+                        enemy1.reset (this.rnd.integerInRange(100, 700) , 0);
+                        enemy1.body.velocity.y = this.rnd.integerInRange(this.minSpeed1, this.maxspeed1) * 1;
                 }
             }
         }
@@ -860,29 +861,50 @@ SpaceAccountants.prototype = {
 
     nextLevel: function() {
         var limitScore = 1000;
-        if (this.puntuacion == limitScore) {
+
+        // Para evitar que se baje de nivel
+        var lastLevel = 5;
+
+        if (this.puntuacion >= limitScore && this.puntuacion < limitScore * 2 && this.level != lastLevel) {
            this.level = 2;
         }
-        else if (this.puntuacion == limitScore * 2)
+        else if (this.puntuacion >= limitScore * 2 && this.puntuacion < limitScore * 3 && this.level != lastLevel)
             this.level = 3;
 
-        else if (this.puntuacion == limitScore * 3)
+        else if (this.puntuacion >= limitScore * 3 && this.puntuacion < limitScore * 4  && this.level != lastLevel)
             this.level = 4;
 
-        else if (this.puntuacion == limitScore * 4)
+        else if (this.puntuacion >= limitScore * 4)
             this.level = 5;
 
         // Actualización del canvas
         this.levelTexte.text = this.levelString + this.level;
     },
+
     levelsEffects : function() {
         if (this.level == 2){
+            this.enemyDelay = 800;
             this.minSpeed = 100;
             this.maxspeed = 130;
         }
-    },
 
-   
+        else if (this.level == 3){
+            this.enemyDelay = 700;
+        }
+
+        else if (this.level == 4){
+            this.enemy1Delay = 600;
+            this.enemy2Delay = 900;
+        }
+
+        else if (this.level == 5){
+            this.minSpeed = 130;
+            this.maxspeed = 160;
+            this.enemy1Delay = 1000;
+            this.minSpeed1 = 60;
+            this.maxspeed1 = 90;
+        }
+    },
 
     playerInput: function() {
         if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
@@ -911,7 +933,8 @@ SpaceAccountants.prototype = {
 
         this.nextEnemy();
         this.colisionEffects();
-        //this.levelsEffects();
+        this.nextLevel();
+        this.levelsEffects();
         this.scoreEffects();
         this.playerInput();
     },

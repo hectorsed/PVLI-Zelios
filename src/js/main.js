@@ -375,7 +375,6 @@ Weapon.SplitShot = function (game) {
     this.name = 'SplitShot';
 
     this.game = game;
-
     this.nextFire = 0;
     this.bulletSpeed = 700;
     this.fireRate = 40;
@@ -419,21 +418,24 @@ Weapon.SplitShot.prototype.fire = function (source, dir) {
 
 Weapon.Pattern = function (game) {
 
-    Phaser.Group.call(this, game, game.world, 'Pattern', false, true, Phaser.Physics.ARCADE);
+    this.bullets = game.add.group();
+    this.bullets.enableBody = true;
+    this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.bullets.createMultiple(320, 'bullet4');
+    this.bullets.setAll('anchor.x', 0,5);
+    this.bullets.setAll('anchor.y', 0.5);
+    this.bullets.setAll('checkWorldBounds', true);
+    this.bullets.setAll('outOfBoundsKill', true);
+    this.name = 'Flamethrower';
 
+    this.game = game;
     this.nextFire = 0;
     this.bulletSpeed = 600;
-    this.fireRate = 40;
-
-    this.pattern = Phaser.ArrayUtils.numberArrayStep(-800, 800, 200);
-    this.pattern = this.pattern.concat(Phaser.ArrayUtils.numberArrayStep(800, -800, -200));
-
-    this.patternIndex = 0;
-
-    for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, 'bullet4'), true);
-    }
-
+    this.fireRate = 100;
+    this.grades = -1;
+    this.maxGrades = 1;
+    this.minGrades = -1;
+    
     return this;
 
 };
@@ -445,19 +447,26 @@ Weapon.Pattern.prototype.fire = function (source, dir) {
 
     if (this.game.time.time < this.nextFire) { return; }
 
-    var x = source.x + 20;
-    var y = source.y + 10;
-
-    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed * dir, 0, this.pattern[this.patternIndex]);
-
-    this.patternIndex++;
-
-    if (this.patternIndex === this.pattern.length) {
-        this.patternIndex = 0;
-    }
+    if (this.bullets.countDead() == 0) { return };
 
     this.nextFire = this.game.time.time + this.fireRate;
 
+    var x = source.x + 20;
+    var y = source.y + 10;
+
+    
+    if (this.grades < this.maxGrades){
+        this.grades += 0.1;
+    }
+
+    if (this.grades >= this.maxGrades){
+        this.grades = this.minGrades;
+    }
+    var bullet = this.bullets.getFirstExists(false);
+    bullet.reset(x, y);
+    bullet.body.velocity.x = this.bulletSpeed * dir;
+    bullet.body.velocity.y = this.bulletSpeed * this.grades;
+    
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -607,7 +616,8 @@ var SpaceAccountants = function () {
     this.levelString = '';
     this.levelTexte = null;
 
-    this.puntuacion = 3000;
+    this.puntuacion = 0;
+    this.lostScore = 75;
     this.score = null;
     this.scoreString = '';
     this.scoreTexte = null;
@@ -625,7 +635,7 @@ var SpaceAccountants = function () {
     // Variables de enemigos que avanzan hacia la izquierda (desde el nivel 1)
     this.enemies = null;
     this.nextEnemyAt = 0;
-    this.enemyDelay = 10000; 
+    this.enemyDelay = 1000; 
     this.minSpeed = 30;
     this.maxspeed = 60;
 
@@ -749,7 +759,7 @@ SpaceAccountants.prototype = {
         if (this.nextEnemyAt < this.time.now && this.enemies.countDead() > 0) {
             this.nextEnemyAt = this.time.now + this.enemyDelay;
             var enemy = this.enemies.getFirstExists(false);
-            enemy.reset (600 , this.rnd.integerInRange(100, 700));
+            enemy.reset (700 , this.rnd.integerInRange(50, 300));
             enemy.body.velocity.x = this.rnd.integerInRange(this.minSpeed, this.maxspeed) * -1;
         }
 
@@ -759,7 +769,7 @@ SpaceAccountants.prototype = {
                 this.nextEnemy2At = this.time.now + this.enemy2Delay;
                 var enemy2 = this.enemies.getFirstExists(false);
                 enemy2.scale.x = enemy2.scale.x * -1;
-                enemy2.reset (20 , this.rnd.integerInRange(100, 700));
+                enemy2.reset (20 , this.rnd.integerInRange(50, 300));
                 enemy2.body.velocity.x = this.rnd.integerInRange(this.minSpeed, this.maxspeed) * 1;
             
             }
@@ -803,7 +813,7 @@ SpaceAccountants.prototype = {
     // Al detectar la colisión jugador con enemigo, se llama a este método
     playerHit: function (player, enemy) {
         enemy.kill();
-        this.puntuacion -= 75;
+        this.puntuacion -= this.lostScore;
         // Actualización del canvas
         this.scoreTexte.text = this.scoreString + this.puntuacion;
     }, 
@@ -883,6 +893,7 @@ SpaceAccountants.prototype = {
 
     levelsEffects : function() {
         if (this.level == 2){
+            this.lostScore = 85;
             this.enemyDelay = 800;
             this.minSpeed = 100;
             this.maxspeed = 130;
@@ -890,14 +901,17 @@ SpaceAccountants.prototype = {
 
         else if (this.level == 3){
             this.enemyDelay = 700;
+            this.lostScore = 95;
         }
 
         else if (this.level == 4){
+            this.lostScore = 95
             this.enemy1Delay = 600;
             this.enemy2Delay = 900;
         }
 
         else if (this.level == 5){
+            this.lostScore = 105;
             this.minSpeed = 130;
             this.maxspeed = 160;
             this.enemy1Delay = 1000;
